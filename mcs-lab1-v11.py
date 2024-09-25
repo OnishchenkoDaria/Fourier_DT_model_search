@@ -1,34 +1,45 @@
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.signal import find_peaks
 
 def FDT_analysis():
   yt, N, T, t_values, delta_t = set_metrics()
   #calling Discrete Fourier Transform function
   cy = Fourier_DT_function(yt, N)
 
+  half_N = math.ceil(N / 2)
+  cy_half = np.abs(cy[:half_N])
+  peaks_new = []
+  for i in range(1, len(cy_half)-1):    
+    if round(cy_half[i], 4) > round(cy_half[i+1], 4) and round(cy_half[i], 4) > round(cy_half[i-1], 4):
+       peaks_new.append(i)
+  print(f"peaks new: {peaks_new}")
+
   peaks = finding_peaks(cy, N)
   
   #Finding the frequencies values of the peaks
   delta_f = 1 / T
-  frequency = delta_f * peaks
+  frequency = [delta_f * peak for peak in peaks]
   print(f"Frequencies with the largest contribution: {frequency}")
 
 def finding_peaks(cy, N):
   #partening the original spectre into half
   half_N = math.ceil(N / 2)
-  cy_half = cy[:half_N]
-
-  #visualizing the half 
-  plt.plot(np.abs(cy_half))
-  plt.title("Half of the FDT graph with true values")
-  plt.show()
+  cy_half = np.abs(cy[:half_N])
 
   #finding absolute spectre peaks
-  # _ - secondory unnecessary for analysis return values
-  peaks, _ = find_peaks(np.abs(cy_half))
+  peaks = []
+  for i in range(1, len(cy_half)-1):    
+    if round(cy_half[i], 4) > round(cy_half[i+1], 4) and round(cy_half[i], 4) > round(cy_half[i-1], 4):
+       peaks.append(i)
   print(f"Max indexes: {peaks}")
+
+  #visualizing the half 
+  plt.plot(cy_half)
+  plt.title("Half of the FDT graph with true values")
+  plt.scatter(peaks, cy_half[peaks], color='red')
+  plt.show()
+
   return peaks
 
 def set_metrics():
