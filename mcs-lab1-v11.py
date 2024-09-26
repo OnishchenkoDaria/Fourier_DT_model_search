@@ -16,8 +16,7 @@ def FDT_analysis():
   print(f"Frequencies with the largest contribution: {frequency}")
   a_coefficient = solve_coefficients(half_N, t_values, frequency, yt)
   [round(a) for a in a_coefficient]
-  print(f"a_j ccoefficient: {a_coefficient}")
-  #OLS_error(half_N, t_values, frequency, yt, a_coefficient
+  print(f"a_j coefficient: {a_coefficient}")
   show_model(a_coefficient, frequency)
 
 def model_function(t, a, f):
@@ -43,20 +42,9 @@ def show_model(a, f):
       
     sin_sum = ""
     for i in range(3, k-2):
-      temp = "sin(2* pi * " + str(f[i-3]) + " * t"
+      temp = "sin(2* pi * " + str(f[i-3]) + " * t )"
       sin_sum  += temp
     print(f"{a[0]} * t^3 + {a[1]} * t^2 + {a[2]} * t + {sin_sum} + {a[k-1]}")
-
-""" def OLS_error(N, t_values, f, yt, a):
-    F_acc = 0 
-    if isinstance(f, list):
-      k = len(f) + 4
-    elif isinstance(f, float):
-      k = 4  
-    for j in range(N):
-        model_value = model_function(t_values[j], a, f)
-        result = model_value - yt[j]
-        F_acc += 0.5 * pow(result, 2) """
 
 #function to compute partial derivatives
 def solve_coefficients(N, t_values, f, yt):
@@ -88,8 +76,14 @@ def solve_coefficients(N, t_values, f, yt):
     rounded_coefficients = np.round(a_coefficients).astype(int)
 
     equation = model_function(t_values, rounded_coefficients, f)
+
+    #error calculation check
+    error = np.mean(0.5 * (yt - equation) **2 )
+    print(f"Error: {error}")
+
     plt.plot(t_values, yt)
     plt.plot(t_values, equation)
+    plt.title("Comparison")
     plt.show()
     return rounded_coefficients
 
