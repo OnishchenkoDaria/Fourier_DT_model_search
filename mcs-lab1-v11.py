@@ -14,10 +14,14 @@ def FDT_analysis():
   delta_f = 1 / T
   frequency = [delta_f * peak for peak in peaks]
   print(f"Frequencies with the largest contribution: {frequency}")
-  a_coefficient = solve_coefficients(half_N, t_values, frequency, yt)
+  #getting rid of 0.2 coefficient as it belongs to the polynomail part
+  frequency_new = frequency[1:]
+  print(f"Frequency parsed: {frequency_new}")
+  
+  a_coefficient = solve_coefficients(N, t_values, frequency_new, yt)
   [round(a) for a in a_coefficient]
   print(f"a_j coefficient: {a_coefficient}")
-  show_model(a_coefficient, frequency)
+  show_model(a_coefficient, frequency_new)
 
 def model_function(t, a, f):
     poly_part = a[0] * pow(t, 3) + a[1] * pow(t, 2) + a[2] * t
@@ -25,24 +29,25 @@ def model_function(t, a, f):
     sin_sum = 0
     #number of total a coefficients
     if isinstance(f, list):
-      k = len(f) + 4
+      k = len(f) + 3
     elif isinstance(f, float):
-      k = 4
-    
-    for i in range(3, k-2):
+      k = 3
+
+    for i in range(3, k):
+        #print(f"i: {i}, f: {f}, f[i]: {f[i]}")
         sin_sum += a[i] * np.sin(2 * math.pi * f[i-3] * t)   
     return poly_part + sin_sum + a[k-1]
 
 #display the aproximate function
 def show_model(a, f):
     if isinstance(f, list):
-      k = len(f) + 4
+      k = len(f) + 3
     elif isinstance(f, float):
-      k = 4
-      
+      k = 3
+
     sin_sum = ""
-    for i in range(3, k-2):
-      temp = "sin(2* pi * " + str(f[i-3]) + " * t )"
+    for i in range(3, k):
+      temp = temp = str(a[i]) + " * sin(2 * pi * " + str(f[i-3]) + " * t )"
       sin_sum  += temp
     print(f"{a[0]} * t^3 + {a[1]} * t^2 + {a[2]} * t + {sin_sum} + {a[k-1]}")
 
@@ -81,9 +86,26 @@ def solve_coefficients(N, t_values, f, yt):
     error = np.mean(0.5 * (yt - equation) **2 )
     print(f"Error: {error}")
 
-    plt.plot(t_values, yt)
-    plt.plot(t_values, equation)
-    plt.title("Comparison")
+    # Create a figure with two subplots (1 row, 2 columns)
+    fig, axs = plt.subplots(1, 2, figsize=(12, 5))  # 1 row, 2 columns
+
+    # First subplot for yt
+    axs[0].plot(t_values, yt, color='blue')
+    axs[0].set_title('yt')
+    axs[0].set_xlabel('t')
+    axs[0].set_ylabel('yt')
+
+    # Second subplot for equation
+    axs[1].plot(t_values, equation, color='red')
+    axs[1].set_title('aproximate y equation')
+    axs[1].set_xlabel('t')
+    axs[1].set_ylabel('equation')
+
+    # Add a main title for the entire figure
+    plt.suptitle("Comparison")
+
+    # Display the plots
+    plt.tight_layout()
     plt.show()
     return rounded_coefficients
 
